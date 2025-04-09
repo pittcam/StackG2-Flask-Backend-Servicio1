@@ -1,30 +1,42 @@
-from flask import Flask
-from dotenv import load_dotenv
-from adapters.persistence.db import init_db, SessionLocal
-from adapters.persistence.user_dao import UserDAO
-from app.use_cases.login_user import LoginUserUseCase
-from app.use_cases.register_user import RegisterUserUseCase
-from adapters.flask.routes import create_routes
+from flask import Flask, request, jsonify
+from ariadne import graphql_sync, make_executable_schema, QueryType
+from ariadne.explorer import ExplorerGraphiQL
+from adapters.graphql.schema import type_defs
+from adapters.graphql.resolver import mutation
+from flask_cors import CORS
 
-# Cargar variables del .env
-load_dotenv()
 
-# Inicializar la app Flask
+# Crear query vacía (obligatoria para el esquema)
+query = QueryType()
+
+# Crear el esquema completo
+schema = make_executable_schema(type_defs, query, mutation)
+
+# Crear app Flask
 app = Flask(__name__)
 
-# Inicializar base de datos y crear tablas si no existen
-init_db()
+#CORS(app)
+CORS(app, resources={r"/graphql": {"origins": "http://localhost:5173"}})
 
-# Crear sesión de BD e inyectar DAO
-db_session = SessionLocal()
-user_repo = UserDAO(db_session)
+# Ruta para la interfaz GraphiQL
+@app.route("/graphql", methods=["GET"])
+def graphql_playground():
+    return ExplorerGraphiQL().html(None), 200
 
-# Casos de uso
-login_use_case = LoginUserUseCase(user_repo)
-register_use_case = RegisterUserUseCase(user_repo)
+# Ruta POST para operaciones GraphQL
+@app.route("/graphql", methods=["POST"])
+def graphql_server():
+    data = request.get_json()
 
-# Registrar blueprint con rutas
-app.register_blueprint(create_routes(login_use_case, register_use_case))
+    success, result = graphql_sync(
+        schema,
+        data,
+        context_value=request,
+        debug=True
+    )
+
+    status_code = 200 if success else 400
+    return jsonify(result), status_code
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-from typing import Optional
 
 @dataclass
 class User:
-    id: Optional[int]
-    name: str
+    id: str
     email: str
-    password: str
-    token: Optional[str] = None
+    username: str
+    name: str
+    token: str = None  # opcional: para incluir el JWT después del registro
