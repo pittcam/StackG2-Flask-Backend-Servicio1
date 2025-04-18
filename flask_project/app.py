@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from ariadne import graphql_sync, make_executable_schema, QueryType
 from ariadne.explorer import ExplorerGraphiQL
-from adapters.graphql.schema import type_defs
-from adapters.graphql.resolver import mutation
+from adapters.In.schema import type_defs
+from adapters.In.resolver import mutation
 from flask_cors import CORS
 
 
@@ -16,7 +16,7 @@ schema = make_executable_schema(type_defs, query, mutation)
 app = Flask(__name__)
 
 #CORS(app)
-CORS(app, resources={r"/graphql": {"origins": "http://localhost:5173"}})
+CORS(app, resources={r"/In": {"origins": "http://localhost:5173"}})
 
 # Ruta para la interfaz GraphiQL
 @app.route("/graphql", methods=["GET"])
