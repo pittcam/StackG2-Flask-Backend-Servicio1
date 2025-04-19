@@ -7,6 +7,7 @@ Este proyecto es una aplicación web para la gestión de películas favoritas co
 
 - Docker y Docker Compose
 - Configuración ambiente de PostgreSQL Local
+- Conexión a internet activa
 ---
 
 ## ⚙️ Configuración Inicial
